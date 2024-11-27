@@ -1,176 +1,95 @@
 import javax.swing.*;
-
 import java.awt.*;
-
 import java.awt.event.ActionEvent;
-
 import java.awt.event.ActionListener;
 
-public class BillCalculator {
-
-    @SuppressWarnings("Convert2Lambda")
-    public static void main(String[] args) {
-
-        // สร้างหน้าต่างหลัก
-
-        JFrame frame = new JFrame("Electricity & Water Bill Calculator");
-
-        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-
-        frame.setSize(450, 300);
-
-        frame.setLayout(new GridLayout(7, 2, 10, 10)); // เพิ่มช่องว่างระหว่างองค์ประกอบ
-
-        // ส่วนประกอบในหน้าต่าง
-
-        JLabel currentElectricLabel = new JLabel("Current Electric Meter:");
-
-        JTextField currentElectricField = new JTextField();
-
-        JLabel lastElectricLabel = new JLabel("Last Electric Meter:");
-
-        JTextField lastElectricField = new JTextField();
-
-        JLabel currentWaterLabel = new JLabel("Current Water Meter:");
-
-        JTextField currentWaterField = new JTextField();
-
-        JLabel lastWaterLabel = new JLabel("Last Water Meter:");
-
-        JTextField lastWaterField = new JTextField();
-
-        JLabel roomTypeLabel = new JLabel("Room Type:");
-
-        String[] roomTypes = {"Single Bed", "Double Bed"};
-
-        JComboBox<String> roomTypeCombo = new JComboBox<>(roomTypes);
-
-        JButton calculateButton = new JButton("Calculate");
-
-        JButton resetButton = new JButton("Reset");
-
-        JProgressBar progressBar = new JProgressBar(0, 100);
-
-        progressBar.setValue(0);
-
-        progressBar.setStringPainted(true);
-
-        JLabel resultLabel = new JLabel("Your bill is: ");
-
-        resultLabel.setHorizontalAlignment(SwingConstants.CENTER); // จัดข้อความให้อยู่กลาง
-
-        // เพิ่มส่วนประกอบลงในหน้าต่าง
-
-        frame.add(currentElectricLabel);
-
-        frame.add(currentElectricField);
-
-        frame.add(lastElectricLabel);
-
-        frame.add(lastElectricField);
-
-        frame.add(currentWaterLabel);
-
-        frame.add(currentWaterField);
-
-        frame.add(lastWaterLabel);
-
-        frame.add(lastWaterField);
-
-        frame.add(roomTypeLabel);
-
-        frame.add(roomTypeCombo);
-
-        frame.add(calculateButton);
-
-        frame.add(resetButton);
-
-        frame.add(progressBar);
-
-        frame.add(resultLabel);
-
-        // กำหนด Action เมื่อกดปุ่ม Calculate
-
-        calculateButton.addActionListener(new ActionListener() {
-
-            @Override
-
-            public void actionPerformed(ActionEvent e) {
-
-                try {
-
-                    int currentElectric = Integer.parseInt(currentElectricField.getText());
-
-                    int lastElectric = Integer.parseInt(lastElectricField.getText());
-
-                    int currentWater = Integer.parseInt(currentWaterField.getText());
-
-                    int lastWater = Integer.parseInt(lastWaterField.getText());
-
-                    if (currentElectric < lastElectric || currentWater < lastWater) {
-
-                        JOptionPane.showMessageDialog(frame,
-
-                                "Current Meter values must be greater than Last Meter values!",
-
-                                "Error", JOptionPane.ERROR_MESSAGE);
-
-                        return;
-
-                    }
-
-                    int electricBill = (currentElectric - lastElectric) * 6;
-
-                    int waterBill = (currentWater - lastWater) * 5;
-
-                    String roomType = (String) roomTypeCombo.getSelectedItem();
-
-                    int basePrice = roomType.equals("Single Bed") ? 1500 : 2000;
-
-                    int totalBill = basePrice + electricBill + waterBill;
-
-                    progressBar.setValue(100); // ตั้งค่า ProgressBar
-
-                    resultLabel.setText("Your bill is: " + totalBill + " THB"); // แสดงผลบิลรวม
-
-                } catch (NumberFormatException ex) {
-
-                    JOptionPane.showMessageDialog(frame,
-
-                            "Please enter valid numeric values!",
-
-                            "Input Error", JOptionPane.ERROR_MESSAGE);
-
-                }
-
-            }
-
-        });
-
-        // กำหนด Action เมื่อกดปุ่ม Reset
-
-        resetButton.addActionListener((var e) -> {
-            currentElectricField.setText("");
-            
-            lastElectricField.setText("");
-            
-            currentWaterField.setText("");
-            
-            lastWaterField.setText("");
-            
-            roomTypeCombo.setSelectedIndex(0);
-            
-            progressBar.setValue(0);
-            
-            resultLabel.setText("Your bill is: ");
-        });
-
-        // แสดงหน้าต่าง
-
-        frame.setVisible(true);
-
+public class BillCalculator extends JFrame {
+    private JTextField displayField;
+    private StringBuilder input;
+
+    public BillCalculator() {
+        // ตั้งค่า JFrame
+        setTitle("Calculator");
+        setSize(400, 500);
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setLayout(new BorderLayout());
+
+        input = new StringBuilder();
+
+        // สร้าง TextField สำหรับแสดงผลลัพธ์
+        displayField = new JTextField();
+        displayField.setEditable(false);
+        displayField.setFont(new Font("Arial", Font.BOLD, 30));
+        displayField.setHorizontalAlignment(SwingConstants.RIGHT);
+        add(displayField, BorderLayout.NORTH);
+
+        // สร้างแผงปุ่ม
+        JPanel buttonPanel = new JPanel();
+        buttonPanel.setLayout(new GridLayout(4, 4, 10, 10));
+
+        // ปุ่มตัวเลขและปุ่มการคำนวณ
+        String[] buttons = {
+            "7", "8", "9", "/",
+            "4", "5", "6", "*",
+            "1", "2", "3", "-",
+            "0", ".", "=", "+"
+        };
+
+        // เพิ่มปุ่มลงในแผง
+        for (String text : buttons) {
+            JButton button = new JButton(text);
+            button.setFont(new Font("Arial", Font.BOLD, 20));
+            button.addActionListener(new ButtonClickListener());
+            buttonPanel.add(button);
+        }
+
+        // เพิ่มแผงปุ่มลงใน JFrame
+        add(buttonPanel, BorderLayout.CENTER);
     }
 
-}
+    // ฟังก์ชันสำหรับการจัดการปุ่มที่ถูกคลิก
+    private class ButtonClickListener implements ActionListener {
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            String command = e.getActionCommand();
 
+            if (command.equals("=")) {
+                try {
+                    // คำนวณผลลัพธ์
+                    String result = calculate(input.toString());
+                    displayField.setText(result);
+                    input.setLength(0);  // เคลียร์ input หลังจากคำนวณ
+                    input.append(result);  // เก็บผลลัพธ์
+                } catch (Exception ex) {
+                    displayField.setText("Error");
+                }
+            } else if (command.equals("C")) {
+                input.setLength(0); // เคลียร์ข้อมูลทั้งหมด
+                displayField.setText("");
+            } else {
+                input.append(command);  // เพิ่มปุ่มที่กดลงใน input
+                displayField.setText(input.toString());
+            }
+        }
+    }
+
+    // ฟังก์ชันคำนวณการคำนวณ (ใช้ eval)
+    private String calculate(String expression) {
+        // ใช้การคำนวณจาก eval หรือใช้ ScriptEngine สำหรับคำนวณ
+        try {
+            javax.script.ScriptEngineManager mgr = new javax.script.ScriptEngineManager();
+            javax.script.ScriptEngine engine = mgr.getEngineByName("JavaScript");
+            return String.valueOf(engine.eval(expression));
+        } catch (Exception e) {
+            return "Error";
+        }
+    }
+
+    public static void main(String[] args) {
+        SwingUtilities.invokeLater(() -> {
+            CalculatorGUI calculator = new CalculatorGUI();
+            calculator.setVisible(true);
+        });
+    }
+}
 
